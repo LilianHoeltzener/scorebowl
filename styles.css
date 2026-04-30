@@ -1,0 +1,544 @@
+/* ScoreBowl Custom Styles */
+
+:root {
+    --primary-color: #0d6efd;
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+    --info-color: #0dcaf0;
+}
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Header Styles */
+header {
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 2rem !important;
+}
+
+/* Card Enhancements */
+.card {
+    border: none;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+}
+
+/* Table Enhancements */
+.table th {
+    border-top: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+}
+
+.table td {
+    vertical-align: middle;
+    padding: 1rem 0.75rem;
+}
+
+/* Editable Inputs */
+.editable-input {
+    border: 2px solid transparent;
+    background: transparent;
+    padding: 0.375rem 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+    width: 100%;
+    text-align: center;
+}
+
+.editable-input:focus {
+    border-color: var(--primary-color);
+    background: white;
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    outline: none;
+}
+
+.editable-input.name-input {
+    text-align: left;
+    font-weight: 500;
+}
+
+/* Rank Badge */
+.rank-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.rank-1 {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #8b6914;
+    box-shadow: 0 2px 10px rgba(255, 215, 0, 0.3);
+}
+
+.rank-2 {
+    background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+    color: #666;
+    box-shadow: 0 2px 10px rgba(192, 192, 192, 0.3);
+}
+
+.rank-3 {
+    background: linear-gradient(135deg, #cd7f32, #daa520);
+    color: #5d4e37;
+    box-shadow: 0 2px 10px rgba(205, 127, 50, 0.3);
+}
+
+.rank-other {
+    background: #6c757d;
+    color: white;
+}
+
+/* Total Score Styling */
+.total-score {
+    font-weight: bold;
+    font-size: 1.2rem;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    background: linear-gradient(135deg, var(--success-color), #20c997);
+    color: white;
+    text-align: center;
+    min-width: 80px;
+    display: inline-block;
+}
+
+/* Action Buttons */
+.btn-action {
+    border: none;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s ease;
+    width: 35px;
+    height: 35px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-delete {
+    background: var(--danger-color);
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #bb2d3b;
+    transform: scale(1.1);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5c636a;
+    transform: scale(1.05);
+}
+
+/* Dropdown menu improvements */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    border-radius: 0.5rem;
+    padding: 0.5rem 0;
+    min-width: 180px;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    transition: background-color 0.2s ease;
+    border-radius: 0;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(13, 110, 253, 0.1);
+}
+
+.dropdown-item i {
+    width: 16px;
+    margin-right: 0.5rem;
+}
+
+.dropdown-divider {
+    margin: 0.5rem 0;
+}
+
+/* Search Input */
+#searchInput {
+    border-radius: 0.5rem;
+    border: 2px solid #e9ecef;
+    transition: border-color 0.2s ease;
+}
+
+#searchInput:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Empty State */
+#emptyState {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding: 0.5rem;
+    }
+    
+    header .container {
+        padding: 0.5rem;
+    }
+    
+    header h1 {
+        font-size: 1.5rem;
+    }
+    
+    /* Stack header buttons on mobile */
+    .col-auto .btn {
+        margin: 0.125rem;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.5rem;
+    }
+    
+    .table-responsive {
+        font-size: 0.875rem;
+    }
+    
+    .editable-input {
+        padding: 0.25rem 0.375rem;
+        font-size: 0.875rem;
+    }
+    
+    .total-score {
+        font-size: 1rem;
+        padding: 0.375rem 0.75rem;
+        min-width: 60px;
+    }
+    
+    .rank-badge {
+        width: 32px;
+        height: 32px;
+        font-size: 0.875rem;
+    }
+    
+    .btn-action {
+        width: 30px;
+        height: 30px;
+        font-size: 0.75rem;
+    }
+    
+    /* Dropdown menu on mobile */
+    .dropdown-menu {
+        min-width: 160px;
+        font-size: 0.875rem;
+    }
+    
+    .dropdown-item {
+        padding: 0.375rem 0.75rem;
+    }
+}
+
+@media (max-width: 576px) {
+    /* Hide some table columns on very small screens */
+    .hide-mobile {
+        display: none;
+    }
+    
+    .table td, .table th {
+        padding: 0.5rem 0.25rem;
+    }
+    
+    .editable-input {
+        max-width: 60px;
+    }
+    
+    .editable-input.name-input {
+        max-width: 120px;
+    }
+}
+
+/* Loading States */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Toast Enhancements */
+.toast {
+    border: none;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+/* Smooth Transitions */
+.table tbody tr {
+    transition: background-color 0.2s ease;
+}
+
+.table tbody tr:hover {
+    background-color: rgba(13, 110, 253, 0.05);
+}
+
+/* Focus States for Accessibility */
+.btn:focus,
+.editable-input:focus {
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+/* Print Styles */
+@media print {
+    .btn, .input-group, #searchInput, .btn-group {
+        display: none !important;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #dee2e6;
+    }
+    
+    .table {
+        font-size: 0.875rem;
+    }
+    
+    .total-score {
+        background: #f8f9fa !important;
+        color: #212529 !important;
+        border: 1px solid #dee2e6;
+    }
+}
+
+/* Utility Classes */
+.text-gradient {
+    background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.pulse {
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+/* Fieldset styling for button groups */
+fieldset.btn-group {
+    border: none;
+    padding: 0;
+    margin: 0;
+    min-width: 0;
+}
+
+fieldset.btn-group legend {
+    display: none;
+}
+
+/* === NOUVEAUX STYLES POUR LES FONCTIONNALITÉS AJOUTÉES === */
+
+/* Vue simplifiée - transitions fluides */
+.score-column {
+    transition: all 0.3s ease;
+}
+
+/* Styles pour les modales d'assistant */
+.modal-header.bg-primary,
+.modal-header.bg-success,
+.modal-header.bg-danger {
+    border-bottom: none;
+}
+
+.modal-lg {
+    max-width: 800px;
+}
+
+/* Cards dans les modales */
+.modal .card {
+    border: 1px solid rgba(0,0,0,0.125);
+    box-shadow: none;
+}
+
+.modal .card:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Checkboxes et radios dans les modales */
+.form-check-label {
+    cursor: pointer;
+}
+
+.form-check-input:checked {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+/* Styles pour les alertes dans les modales */
+.alert-danger {
+    border-left: 4px solid var(--danger-color);
+}
+
+/* Icônes grandes dans les modales */
+.display-4 {
+    font-size: 3rem;
+    opacity: 0.8;
+}
+
+/* Bouton de vue toggle */
+#viewToggleBtn {
+    transition: all 0.3s ease;
+}
+
+#viewToggleBtn:hover {
+    transform: scale(1.05);
+}
+
+/* Animations pour les éléments qui disparaissent/apparaissent */
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.score-column.hiding {
+    animation: fadeOut 0.3s ease;
+}
+
+.score-column.showing {
+    animation: fadeIn 0.3s ease;
+}
+
+/* Styles pour les listes dans les modales */
+.modal ul {
+    padding-left: 1.5rem;
+}
+
+.modal li {
+    margin-bottom: 0.25rem;
+}
+
+/* Amélioration des dropdowns dans le tableau */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+    border-radius: 8px;
+}
+
+.dropdown-item {
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    margin: 2px;
+}
+
+.dropdown-item:hover {
+    background-color: rgba(0,123,255,0.1);
+}
+
+.dropdown-item.text-danger:hover {
+    background-color: rgba(220,53,69,0.1);
+}
+
+/* Responsivité améliorée pour les nouveaux boutons */
+@media (max-width: 768px) {
+    .modal-lg {
+        max-width: 95%;
+        margin: 10px auto;
+    }
+    
+    .modal-body {
+        padding: 1rem;
+    }
+    
+    .row {
+        margin: 0;
+    }
+    
+    .col-md-4, .col-md-8 {
+        padding: 0.5rem;
+    }
+    
+    /* Header responsive pour les nouveaux boutons */
+    header .btn {
+        font-size: 0.8rem;
+        padding: 0.375rem 0.5rem;
+        margin: 0.125rem;
+    }
+    
+    header .btn i {
+        margin-right: 0.25rem;
+    }
+    
+    /* Masquer le texte des boutons sur très petits écrans */
+    @media (max-width: 576px) {
+        header .btn span {
+            display: none;
+        }
+        
+        header .btn {
+            padding: 0.375rem;
+        }
+        
+        header .btn i {
+            margin-right: 0;
+        }
+    }
+}
+
+/* Animations d'entrée pour les modales */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+}
+
+.modal.show .modal-dialog {
+    transform: translateY(0);
+}
+
+/* Styles pour les badges de notification */
+.toast {
+    min-width: 300px;
+}
+
+.toast-header {
+    border-radius: 0.375rem 0.375rem 0 0;
+}
+
+.toast-body {
+    font-weight: 500;
+}
+
+/* Amélioration des formulaires dans les modales */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-check-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}

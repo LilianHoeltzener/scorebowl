@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ScoreBowl - Gestion de Concours</title>
+    
+    <!-- PWA Meta tags -->
+    <meta name="theme-color" content="#0d6efd">
+    <meta name="description" content="Application de gestion de concours avec scores multiples et classement automatique">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/svg+xml" href="icons/icon-192x192.svg">
+    <link rel="apple-touch-icon" href="icons/icon-192x192.svg">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <header class="bg-primary text-white py-3 mb-4 rounded-bottom">
+            <div class="container">
+                <div class="row align-items-center">
+                    <div class="col">
+                        <h1 class="h3 mb-0">
+                            <i class="bi bi-trophy-fill me-2"></i>
+                            ScoreBowl
+                        </h1>
+                        <small class="opacity-75">Gestion de concours</small>
+                    </div>
+                    <div class="col-auto">
+                        <button class="btn btn-outline-light btn-sm" onclick="toggleSimpleView()" id="viewToggleBtn" title="Basculer en vue simplifiée">
+                            <i class="bi bi-eye-slash"></i> Vue simple
+                        </button>
+                        <button class="btn btn-light btn-sm" onclick="showExportAssistant()">
+                            <i class="bi bi-download"></i> Exporter
+                        </button>
+                        <button class="btn btn-light btn-sm" onclick="showImportAssistant()">
+                            <i class="bi bi-upload"></i> Importer
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="showClearConfirmation()">
+                            <i class="bi bi-trash"></i> Tout effacer
+                        </button>
+                        <button class="btn btn-success btn-sm" onclick="addParticipant()">
+                            <i class="bi bi-person-plus"></i> Nouveau
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="container">
+            <!-- Stats Row -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">
+                                <i class="bi bi-people-fill"></i>
+                                <span class="visually-hidden">Participants</span>
+                            </h5>
+                            <h3 id="totalParticipants" class="mb-0">0</h3>
+                            <small class="text-muted">Participants</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-success">
+                                <i class="bi bi-star-fill"></i>
+                                <span class="visually-hidden">Meilleur score</span>
+                            </h5>
+                            <h3 id="bestScore" class="mb-0">-</h3>
+                            <small class="text-muted">Meilleur total</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <h5 class="card-title text-info">
+                                <i class="bi bi-calculator"></i>
+                                <span class="visually-hidden">Score moyen</span>
+                            </h5>
+                            <h3 id="averageScore" class="mb-0">-</h3>
+                            <small class="text-muted">Moyenne</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Search and Filter -->
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" class="form-control" id="searchInput" 
+                               placeholder="Rechercher un participant..." 
+                               onkeyup="filterParticipants()">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <fieldset class="btn-group w-100" role="group" aria-label="Options de tri">
+                        <legend class="visually-hidden">Trier par</legend>
+                        <button type="button" class="btn btn-outline-secondary active" onclick="sortBy('rank')" id="sortRankBtn">
+                            <i class="bi bi-sort-numeric-down"></i> Classement ↓
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="sortBy('name')" id="sortNameBtn">
+                            <i class="bi bi-sort-alpha-down"></i> Nom ↓
+                        </button>
+                    </fieldset>
+                </div>
+            </div>
+
+            <!-- Participants Table -->
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="bi bi-list-ol"></i>
+                        Classement des participants
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0" id="participantsTable">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th class="text-center" style="width: 60px;">
+                                        <i class="bi bi-hash"></i>
+                                    </th>
+                                    <th style="min-width: 200px;">
+                                        <i class="bi bi-person"></i> Participant
+                                    </th>
+                                    <th class="text-center score-column" style="width: 100px;">
+                                        <i class="bi bi-1-circle"></i> Score 1
+                                    </th>
+                                    <th class="text-center score-column" style="width: 100px;">
+                                        <i class="bi bi-2-circle"></i> Score 2
+                                    </th>
+                                    <th class="text-center score-column" style="width: 100px;">
+                                        <i class="bi bi-3-circle"></i> Score 3
+                                    </th>
+                                    <th class="text-center" style="width: 120px;">
+                                        <i class="bi bi-sum"></i> Total
+                                    </th>
+                                    <th class="text-center" style="width: 80px;">
+                                        <i class="bi bi-gear"></i>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="participantsBody">
+                                <!-- Les participants seront ajoutés ici dynamiquement -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="text-center py-5" style="display: none;">
+                <div class="mb-4">
+                    <i class="bi bi-people display-1 text-muted"></i>
+                </div>
+                <h3 class="text-muted mb-3">Aucun participant</h3>
+                <p class="text-muted mb-4">Commencez par ajouter votre premier participant au concours</p>
+                <button class="btn btn-primary btn-lg" onclick="addParticipant()">
+                    <i class="bi bi-person-plus"></i> Ajouter un participant
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Modal -->
+    <div class="modal fade" id="importModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-upload"></i> Importer des données
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="file" class="form-control" id="importFile" accept=".json">
+                    <div class="form-text">
+                        Sélectionnez un fichier JSON exporté précédemment
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="processImport()">Importer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Assistant Modal -->
+    <div class="modal fade" id="exportAssistantModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-download"></i> Assistant d'exportation
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6><i class="bi bi-info-circle text-primary"></i> Qu'est-ce que l'export ?</h6>
+                            <p class="text-muted small mb-3">
+                                L'export permet de sauvegarder vos données (participants et scores) dans un fichier JSON que vous pourrez 
+                                réimporter plus tard ou partager avec d'autres personnes.
+                            </p>
+                            
+                            <h6><i class="bi bi-shield-check text-success"></i> Données incluses</h6>
+                            <ul class="small text-muted mb-3">
+                                <li>Tous les participants et leurs noms</li>
+                                <li>Les 3 scores de chaque participant</li>
+                                <li>Les totaux et classements</li>
+                                <li>Date et heure d'export</li>
+                            </ul>
+
+                            <h6><i class="bi bi-gear text-warning"></i> Options d'export</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="checkbox" id="exportWithStats" checked>
+                                <label class="form-check-label small" for="exportWithStats">
+                                    Inclure les statistiques globales
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="exportReadableFormat">
+                                <label class="form-check-label small" for="exportReadableFormat">
+                                    Format lisible (JSON indenté)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-people-fill text-primary"></i> Aperçu
+                                    </h6>
+                                    <h4 id="exportPreviewCount" class="text-primary">0</h4>
+                                    <small class="text-muted">participants à exporter</small>
+                                    <hr>
+                                    <small class="text-muted">
+                                        <i class="bi bi-calendar"></i> 
+                                        <span id="exportDate"></span>
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x"></i> Annuler
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="executeExport()">
+                        <i class="bi bi-download"></i> Télécharger le fichier
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Assistant Modal -->
+    <div class="modal fade" id="importAssistantModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-upload"></i> Assistant d'importation
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h6><i class="bi bi-info-circle text-info"></i> Instructions</h6>
+                            <ol class="small text-muted mb-3">
+                                <li>Sélectionnez un fichier JSON exporté depuis ScoreBowl</li>
+                                <li>Choisissez comment traiter les données existantes</li>
+                                <li>Cliquez sur "Importer" pour charger les données</li>
+                            </ol>
+
+                            <h6><i class="bi bi-exclamation-triangle text-warning"></i> Attention</h6>
+                            <p class="small text-muted mb-3">
+                                L'importation peut remplacer ou fusionner avec vos données actuelles selon l'option choisie.
+                            </p>
+
+                            <h6><i class="bi bi-file-earmark text-primary"></i> Sélectionner le fichier</h6>
+                            <input type="file" class="form-control mb-3" id="importAssistantFile" accept=".json">
+                            
+                            <h6><i class="bi bi-arrow-left-right text-info"></i> Mode d'importation</h6>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="importMode" id="importModeReplace" value="replace" checked>
+                                <label class="form-check-label small" for="importModeReplace">
+                                    <strong>Remplacer</strong> - Effacer toutes les données actuelles et les remplacer
+                                </label>
+                            </div>
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" type="radio" name="importMode" id="importModeMerge" value="merge">
+                                <label class="form-check-label small" for="importModeMerge">
+                                    <strong>Fusionner</strong> - Ajouter aux données existantes (doublons possibles)
+                                </label>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card bg-light">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">
+                                        <i class="bi bi-database text-success"></i> Données actuelles
+                                    </h6>
+                                    <h4 id="currentParticipantsCount" class="text-success">0</h4>
+                                    <small class="text-muted">participants</small>
+                                    <hr>
+                                    <div id="importPreview" style="display: none;">
+                                        <h6 class="card-title">
+                                            <i class="bi bi-file-text text-info"></i> Fichier sélectionné
+                                        </h6>
+                                        <h4 id="importParticipantsCount" class="text-info">0</h4>
+                                        <small class="text-muted">participants à importer</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x"></i> Annuler
+                    </button>
+                    <button type="button" class="btn btn-success" onclick="executeImport()" id="importAssistantBtn" disabled>
+                        <i class="bi bi-upload"></i> Importer les données
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clear Confirmation Modal -->
+    <div class="modal fade" id="clearConfirmationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle"></i> Confirmation de suppression
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <i class="bi bi-trash display-4 text-danger"></i>
+                    </div>
+                    <div class="alert alert-danger">
+                        <h6><i class="bi bi-exclamation-diamond"></i> Action irréversible</h6>
+                        <p class="mb-0">Vous êtes sur le point de supprimer <strong>TOUS</strong> les participants et leurs scores.</p>
+                    </div>
+                    <p><strong>Données qui seront supprimées :</strong></p>
+                    <ul class="mb-3">
+                        <li><span id="clearParticipantsCount">0</span> participant(s)</li>
+                        <li>Tous les scores et totaux</li>
+                        <li>L'historique de classement</li>
+                    </ul>
+                    <p class="text-muted small">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Conseil :</strong> Pensez à exporter vos données avant de continuer si vous souhaitez les conserver.
+                    </p>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="clearConfirmCheck">
+                        <label class="form-check-label" for="clearConfirmCheck">
+                            Je comprends que cette action est irréversible
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x"></i> Annuler
+                    </button>
+                    <button type="button" class="btn btn-outline-primary" onclick="showExportAssistant(); bootstrap.Modal.getInstance(document.getElementById('clearConfirmationModal')).hide();">
+                        <i class="bi bi-download"></i> Exporter d'abord
+                    </button>
+                    <button type="button" class="btn btn-danger" onclick="executeClear()" id="clearConfirmBtn" disabled>
+                        <i class="bi bi-trash"></i> Supprimer tout
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="saveToast" class="toast" role="alert">
+            <div class="toast-header bg-success text-white">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong class="me-auto">Sauvegardé</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body">
+                Les données ont été sauvegardées automatiquement
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="script.js"></script>
+    
+    <!-- PWA Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
+            });
+        }
+    </script>
+</body>
+</html>

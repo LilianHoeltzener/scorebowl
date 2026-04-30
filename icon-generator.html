@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <title>Générateur d'icônes ScoreBowl</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; text-align: center; }
+        canvas { border: 1px solid #ccc; margin: 10px; }
+        .download-section { margin: 20px 0; }
+        .icon-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; }
+        .icon-item { text-align: center; }
+    </style>
+</head>
+<body>
+    <h1>Générateur d'icônes ScoreBowl</h1>
+    <p>Cliquez sur "Générer toutes les icônes" puis faites clic droit > "Enregistrer l'image sous..." sur chaque icône</p>
+    
+    <button onclick="generateAllIcons()" style="background: #0d6efd; color: white; border: none; padding: 15px 30px; border-radius: 5px; font-size: 16px; cursor: pointer;">
+        Générer toutes les icônes
+    </button>
+    
+    <div id="iconContainer" class="icon-grid"></div>
+
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        
+        function generateIcon(size) {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Fond dégradé bleu
+            const gradient = ctx.createLinearGradient(0, 0, size, size);
+            gradient.addColorStop(0, '#0d6efd');
+            gradient.addColorStop(1, '#0056b3');
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, size, size);
+            
+            // Bordure arrondie
+            ctx.beginPath();
+            const radius = size * 0.1;
+            ctx.roundRect(0, 0, size, size, radius);
+            ctx.clip();
+            ctx.fillRect(0, 0, size, size);
+            
+            // Icône trophée
+            ctx.fillStyle = '#FFD700';
+            const centerX = size / 2;
+            const centerY = size / 2;
+            const trophySize = size * 0.6;
+            
+            // Coupe du trophée
+            ctx.beginPath();
+            ctx.arc(centerX, centerY - trophySize * 0.1, trophySize * 0.25, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Base du trophée
+            ctx.fillRect(centerX - trophySize * 0.15, centerY + trophySize * 0.1, trophySize * 0.3, trophySize * 0.1);
+            
+            // Poignées
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = size * 0.02;
+            ctx.beginPath();
+            ctx.arc(centerX - trophySize * 0.2, centerY - trophySize * 0.05, trophySize * 0.08, 0, Math.PI);
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(centerX + trophySize * 0.2, centerY - trophySize * 0.05, trophySize * 0.08, 0, Math.PI);
+            ctx.stroke();
+            
+            // Ombre
+            ctx.fillStyle = 'rgba(0,0,0,0.1)';
+            ctx.fillRect(0, size * 0.9, size, size * 0.1);
+            
+            return canvas;
+        }
+        
+        function generateAllIcons() {
+            const container = document.getElementById('iconContainer');
+            container.innerHTML = '';
+            
+            sizes.forEach(size => {
+                const canvas = generateIcon(size);
+                const iconItem = document.createElement('div');
+                iconItem.className = 'icon-item';
+                
+                const title = document.createElement('h3');
+                title.textContent = `${size}x${size}`;
+                
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL();
+                link.download = `icon-${size}x${size}.png`;
+                link.appendChild(canvas);
+                
+                const downloadText = document.createElement('p');
+                downloadText.innerHTML = '<small>Clic droit > Enregistrer sous</small>';
+                
+                iconItem.appendChild(title);
+                iconItem.appendChild(link);
+                iconItem.appendChild(downloadText);
+                container.appendChild(iconItem);
+            });
+        }
+        
+        // Support pour roundRect si non disponible
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                this.beginPath();
+                this.moveTo(x + radius, y);
+                this.lineTo(x + width - radius, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius);
+                this.lineTo(x + width, y + height - radius);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+                this.lineTo(x + radius, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius);
+                this.lineTo(x, y + radius);
+                this.quadraticCurveTo(x, y, x + radius, y);
+                this.closePath();
+                return this;
+            };
+        }
+    </script>
+</body>
+</html>

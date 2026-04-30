@@ -1,0 +1,51 @@
+{
+  "participants": [
+    {
+      "id": 1,
+      "name": "Alice Martin",
+      "score1": 85,
+      "score2": 92,
+      "score3": 78,
+      "total": 255,
+      "rank": 1
+    },
+    {
+      "id": 2,
+      "name": "Bob Dupont",
+      "score1": 70,
+      "score2": 88,
+      "score3": 82,
+      "total": 240,
+      "rank": 2
+    },
+    {
+      "id": 3,
+      "name": "Claire Dubois",
+      "score1": 76,
+      "score2": 79,
+      "score3": 85,
+      "total": 240,
+      "rank": 2
+    },
+    {
+      "id": 4,
+      "name": "David Leclerc",
+      "score1": 68,
+      "score2": 75,
+      "score3": 90,
+      "total": 233,
+      "rank": 4
+    },
+    {
+      "id": 5,
+      "name": "Emma Moreau",
+      "score1": 82,
+      "score2": 71,
+      "score3": 77,
+      "total": 230,
+      "rank": 5
+    }
+  ],
+  "exportDate": "2025-08-04T12:30:00.000Z",
+  "version": "1.0"
+}

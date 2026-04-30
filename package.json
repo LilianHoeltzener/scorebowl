@@ -1,0 +1,47 @@
+{
+    "name": "scorebowl-desktop",
+    "version": "1.0.0",
+    "description": "ScoreBowl en application desktop installable Windows et macOS",
+    "main": "electron/main.js",
+    "private": true,
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder --publish never",
+        "build:win": "electron-builder --publish never --win nsis portable --x64",
+        "build:mac": "electron-builder --publish never --mac dmg --universal"
+    },
+    "devDependencies": {
+        "electron": "^31.7.7",
+        "electron-builder": "^24.13.3"
+    },
+    "build": {
+        "appId": "fr.scorebowl.app",
+        "productName": "ScoreBowl",
+        "asar": true,
+        "directories": {
+            "output": "dist"
+        },
+        "files": [
+            "index.html",
+            "styles.css",
+            "script.js",
+            "manifest.json",
+            "sw.js",
+            "icons/**/*",
+            "electron/**/*"
+        ],
+        "mac": {
+            "target": [
+                "dmg",
+                "zip"
+            ],
+            "category": "public.app-category.utilities"
+        },
+        "win": {
+            "target": [
+                "nsis",
+                "portable"
+            ]
+        }
+    }
+}
