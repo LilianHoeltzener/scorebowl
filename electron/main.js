@@ -1,23 +1,46 @@
 const { app, BrowserWindow, shell } = require('electron');
-const path = require('path');
+const path = require('node:path');
 
-function createWindow() {
-    const window = new BrowserWindow({
+function createBrowserWindow(options = {}) {
+    return new BrowserWindow({
         width: 1280,
         height: 840,
-        minWidth: 900,
-        minHeight: 600,
         autoHideMenuBar: true,
         webPreferences: {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
-            nodeIntegration: false
-        }
+            nodeIntegration: false,
+            backgroundThrottling: false
+        },
+        ...options
     });
+}
+
+function createWindow() {
+    const window = createBrowserWindow();
 
     window.loadFile(path.join(__dirname, '..', 'index.html'));
 
     window.webContents.setWindowOpenHandler(({ url }) => {
+        if (url.includes('?mode=display')) {
+            return {
+                action: 'allow',
+                overrideBrowserWindowOptions: {
+                    width: 1440,
+                    height: 900,
+                    backgroundColor: '#0f1f35',
+                    autoHideMenuBar: true,
+                    title: 'ScoreBowl - Classement en direct',
+                    webPreferences: {
+                        preload: path.join(__dirname, 'preload.js'),
+                        contextIsolation: true,
+                        nodeIntegration: false,
+                        backgroundThrottling: false
+                    }
+                }
+            };
+        }
+
         shell.openExternal(url);
         return { action: 'deny' };
     });

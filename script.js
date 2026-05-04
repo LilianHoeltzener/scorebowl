@@ -6,6 +6,12 @@ let currentSort = 'rank';
 let sortDirection = 'asc'; // 'asc' ou 'desc'
 let nextId = 1;
 let simpleView = false; // Vue simplifiée (masque les colonnes de scores individuels)
+const isDisplayMode = new URLSearchParams(globalThis.location.search).get('mode') === 'display';
+let displayRefreshInterval = null;
+let displayScrollInterval = null;
+let displayResizeHandler = null;
+let displayDataFingerprint = '';
+let displayScrollStartTimeout = null;
 
 // Clés pour le localStorage
 const STORAGE_KEY = 'scorebowl_participants';
@@ -14,6 +20,7 @@ const SETTINGS_KEY = 'scorebowl_settings';
 // Initialisation de l'application
 document.addEventListener('DOMContentLoaded', function () {
     loadData();
+    initializeMode();
     updateDisplay();
     updateViewToggleButton();
     updateTableColumns();
@@ -23,6 +30,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
 // Configuration des event listeners
 function setupEventListeners() {
+    if (isDisplayMode) {
+        return;
+    }
+
     // Event listener pour la recherche
     document.getElementById('searchInput').addEventListener('input', filterParticipants);
 
@@ -55,6 +66,8 @@ function setupEventListeners() {
 
 // Gestion des participants
 function addParticipant() {
+    if (isDisplayMode) return;
+
     const defaultName = `Participant ${participants.length + 1}`;
     const name = safePrompt('Nom du participant:', defaultName);
     if (name === null) {
@@ -87,6 +100,8 @@ function addParticipant() {
 }
 
 function deleteParticipant(id) {
+    if (isDisplayMode) return;
+
     const participant = participants.find(p => p.id === id);
     if (participant) {
         showDeleteConfirmation(participant);
@@ -94,6 +109,8 @@ function deleteParticipant(id) {
 }
 
 function duplicateParticipant(id) {
+    if (isDisplayMode) return;
+
     const participant = participants.find(p => p.id === id);
     if (!participant) return;
 
@@ -129,6 +146,8 @@ function duplicateParticipant(id) {
 }
 
 function resetParticipantScores(id) {
+    if (isDisplayMode) return;
+
     const participant = participants.find(p => p.id === id);
     if (!participant) return;
 
@@ -145,6 +164,8 @@ function resetParticipantScores(id) {
 }
 
 function clearAllData() {
+    if (isDisplayMode) return;
+
     if (participants.length === 0) {
         showToast('Aucune donnée à supprimer');
         return;
@@ -153,6 +174,8 @@ function clearAllData() {
 }
 
 function updateParticipant(id, field, value) {
+    if (isDisplayMode) return;
+
     const participant = participants.find(p => p.id === id);
     if (!participant) return;
 
@@ -187,6 +210,11 @@ function updateRankings() {
 
 // Affichage et interface utilisateur
 function updateDisplay() {
+    if (isDisplayMode) {
+        updateDisplayScreen();
+        return;
+    }
+
     updateStats();
     updateTable();
     updateEmptyState();
@@ -426,6 +454,8 @@ function updateSortButtons() {
 }
 
 function filterParticipants() {
+    if (isDisplayMode) return;
+
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const rows = document.querySelectorAll('.participant-row');
 
@@ -443,6 +473,8 @@ function filterParticipants() {
 
 // Sauvegarde et chargement des données
 function saveData() {
+    if (isDisplayMode) return;
+
     try {
         const data = {
             participants: participants,
@@ -474,6 +506,8 @@ function loadData() {
 }
 
 function saveSettings() {
+    if (isDisplayMode) return;
+
     const settings = {
         currentSort: currentSort,
         sortDirection: sortDirection,
@@ -501,6 +535,8 @@ function loadSettings() {
 
 // Import/Export
 function exportData() {
+    if (isDisplayMode) return;
+
     const data = {
         participants: participants,
         exportDate: new Date().toISOString(),
@@ -522,11 +558,15 @@ function exportData() {
 }
 
 function importData() {
+    if (isDisplayMode) return;
+
     const modal = new bootstrap.Modal(document.getElementById('importModal'));
     modal.show();
 }
 
 function processImport() {
+    if (isDisplayMode) return;
+
     const fileInput = document.getElementById('importFile');
     if (fileInput.files.length > 0) {
         // Le traitement se fait dans l'event listener du input file
@@ -540,6 +580,8 @@ function processImport() {
 
 // Vue simplifiée
 function toggleSimpleView() {
+    if (isDisplayMode) return;
+
     simpleView = !simpleView;
     updateViewToggleButton();
     updateTableColumns();
@@ -568,6 +610,8 @@ function updateTableColumns() {
 
 // Assistant d'export
 function showExportAssistant() {
+    if (isDisplayMode) return;
+
     const modal = new bootstrap.Modal(document.getElementById('exportAssistantModal'));
 
     // Mise à jour des informations
@@ -578,6 +622,8 @@ function showExportAssistant() {
 }
 
 function executeExport() {
+    if (isDisplayMode) return;
+
     const includeStats = document.getElementById('exportWithStats').checked;
     const readableFormat = document.getElementById('exportReadableFormat').checked;
 
@@ -621,6 +667,8 @@ function executeExport() {
 
 // Assistant d'import
 function showImportAssistant() {
+    if (isDisplayMode) return;
+
     const modal = new bootstrap.Modal(document.getElementById('importAssistantModal'));
 
     // Mise à jour du compteur actuel
@@ -639,6 +687,8 @@ function showImportAssistant() {
 }
 
 function handleImportFileSelect(event) {
+    if (isDisplayMode) return;
+
     const file = event.target.files[0];
     const previewDiv = document.getElementById('importPreview');
     const importBtn = document.getElementById('importAssistantBtn');
@@ -673,6 +723,8 @@ function handleImportFileSelect(event) {
 }
 
 function executeImport() {
+    if (isDisplayMode) return;
+
     if (!window.pendingImportData) {
         alert('Aucune donnée à importer');
         return;
@@ -709,6 +761,8 @@ function executeImport() {
 
 // Confirmation de suppression
 function showClearConfirmation() {
+    if (isDisplayMode) return;
+
     const modal = new bootstrap.Modal(document.getElementById('clearConfirmationModal'));
 
     // Mise à jour du nombre de participants
@@ -727,6 +781,8 @@ function showClearConfirmation() {
 }
 
 function executeClear() {
+    if (isDisplayMode) return;
+
     participants = [];
     nextId = 1;
     currentSort = 'rank';
@@ -749,6 +805,8 @@ function executeClear() {
 }
 
 function showDeleteConfirmation(participant) {
+    if (isDisplayMode) return;
+
     if (confirm(`Supprimer ${participant.name} ?\n\nCette action supprimera définitivement ce participant et tous ses scores.`)) {
         participants = participants.filter(p => p.id !== participant.id);
         updateRankings();
@@ -766,6 +824,11 @@ function escapeHtml(text) {
 }
 
 function showToast(message) {
+    if (isDisplayMode) {
+        console.log(message);
+        return;
+    }
+
     const toastElement = document.getElementById('saveToast');
     if (!toastElement) {
         console.log(message);
@@ -797,31 +860,234 @@ function safePrompt(message, defaultValue) {
     return defaultValue;
 }
 
+function initializeMode() {
+    if (!isDisplayMode) {
+        return;
+    }
+
+    document.body.classList.add('display-mode');
+    document.title = 'ScoreBowl - Classement en direct';
+    startDisplayAutoRefresh();
+
+    displayResizeHandler = () => {
+        restartDisplayAutoScroll();
+    };
+    globalThis.addEventListener('resize', displayResizeHandler);
+}
+
+function updateDisplayScreen() {
+    const totalElement = document.getElementById('displayTotalParticipants');
+    const bestElement = document.getElementById('displayBestScore');
+    const listElement = document.getElementById('displayParticipantsList');
+
+    if (!totalElement || !bestElement || !listElement) {
+        return;
+    }
+
+    totalElement.textContent = participants.length;
+    bestElement.textContent = participants.length > 0
+        ? Math.max(...participants.map((participant) => participant.total))
+        : '-';
+
+    const sortedParticipants = getDisplaySortedParticipants();
+    displayDataFingerprint = getDisplayDataFingerprint(sortedParticipants);
+
+    if (participants.length === 0) {
+        listElement.innerHTML = '<div class="display-screen__empty">Le classement apparaîtra ici dès que vous ajouterez des participants.</div>';
+        stopDisplayAutoScroll();
+        return;
+    }
+
+    renderDisplayRows(sortedParticipants);
+
+    restartDisplayAutoScroll();
+}
+
+function startDisplayAutoRefresh() {
+    stopDisplayAutoRefresh();
+    displayRefreshInterval = setInterval(() => {
+        refreshDisplayData();
+    }, 1000);
+
+    globalThis.addEventListener('storage', refreshDisplayData);
+}
+
+function stopDisplayAutoRefresh() {
+    if (displayRefreshInterval) {
+        clearInterval(displayRefreshInterval);
+        displayRefreshInterval = null;
+    }
+
+    if (displayResizeHandler) {
+        globalThis.removeEventListener('resize', displayResizeHandler);
+        displayResizeHandler = null;
+    }
+}
+
+function refreshDisplayData() {
+    loadData();
+    const nextFingerprint = getDisplayDataFingerprint(getDisplaySortedParticipants());
+    if (nextFingerprint !== displayDataFingerprint) {
+        updateDisplayScreen();
+    }
+}
+
+function getDisplaySortedParticipants() {
+    // L'ecran de classement reste toujours trie par score (rang),
+    // quel que soit le tri choisi dans l'ecran de saisie.
+    return [...participants].sort((a, b) => {
+        if (a.rank !== b.rank) {
+            return a.rank - b.rank;
+        }
+        if (b.total !== a.total) {
+            return b.total - a.total;
+        }
+        return a.name.localeCompare(b.name, 'fr');
+    });
+}
+
+function restartDisplayAutoScroll() {
+    stopDisplayAutoScroll();
+
+    const viewport = document.getElementById('displayViewport');
+    const list = document.getElementById('displayParticipantsList');
+    if (!viewport || !list) {
+        return;
+    }
+
+    const startWhenReady = (attempt = 0) => {
+        const maxScroll = viewport.scrollHeight - viewport.clientHeight;
+        if (maxScroll <= 2) {
+            if (attempt < 15) {
+                displayScrollStartTimeout = setTimeout(() => startWhenReady(attempt + 1), 200);
+            }
+            return;
+        }
+
+        viewport.scrollTop = 0;
+        let pauseTicks = 60; // pause initiale en haut (~2s)
+        let reachedBottom = false;
+
+        displayScrollInterval = setInterval(() => {
+            const dynamicMax = viewport.scrollHeight - viewport.clientHeight;
+            if (dynamicMax <= 2) {
+                viewport.scrollTop = 0;
+                return;
+            }
+
+            if (pauseTicks > 0) {
+                pauseTicks -= 1;
+                if (pauseTicks === 0 && reachedBottom) {
+                    // fin de pause en bas → retour en haut
+                    viewport.scrollTop = 0;
+                    reachedBottom = false;
+                    pauseTicks = 60; // pause en haut avant de redéfiler
+                }
+                return;
+            }
+
+            const next = viewport.scrollTop + 1;
+            if (next >= dynamicMax) {
+                viewport.scrollTop = dynamicMax;
+                reachedBottom = true;
+                pauseTicks = 90; // ~3s de pause en bas
+                return;
+            }
+
+            viewport.scrollTop = next;
+        }, 35);
+    };
+
+    startWhenReady();
+}
+
+function stopDisplayAutoScroll() {
+    if (displayScrollStartTimeout) {
+        clearTimeout(displayScrollStartTimeout);
+        displayScrollStartTimeout = null;
+    }
+
+    if (displayScrollInterval) {
+        clearInterval(displayScrollInterval);
+        displayScrollInterval = null;
+    }
+}
+
+function renderDisplayRows(rows) {
+    const listElement = document.getElementById('displayParticipantsList');
+    if (!listElement) {
+        return;
+    }
+
+    if (rows.length === 0) {
+        listElement.innerHTML = '<div class="display-screen__empty">Le classement apparaîtra ici dès que vous ajouterez des participants.</div>';
+        return;
+    }
+
+    listElement.innerHTML = rows
+        .map((participant) => {
+            const rowClass = participant.rank <= 3 ? 'display-screen__row display-screen__row--podium' : 'display-screen__row';
+            return `
+                <div class="${rowClass}">
+                    <span class="display-screen__rank">${participant.rank}</span>
+                    <span class="display-screen__name">${escapeHtml(participant.name)}</span>
+                    <span class="display-screen__score">${participant.score1}</span>
+                    <span class="display-screen__score">${participant.score2}</span>
+                    <span class="display-screen__score">${participant.score3}</span>
+                    <span class="display-screen__total">${participant.total}</span>
+                </div>
+            `;
+        })
+        .join('');
+}
+
+function getDisplayDataFingerprint(participantList) {
+    return JSON.stringify(
+        participantList.map((participant) => ({
+            id: participant.id,
+            name: participant.name,
+            score1: participant.score1,
+            score2: participant.score2,
+            score3: participant.score3,
+            total: participant.total,
+            rank: participant.rank
+        }))
+    );
+}
+
+function openDisplayScreen() {
+    const displayUrl = new URL(`${globalThis.location.pathname}?mode=display`, globalThis.location.href).toString();
+    globalThis.open(displayUrl, 'scorebowl-display');
+}
+
 // Gestion des erreurs globales
-window.addEventListener('error', function (e) {
+globalThis.addEventListener('error', function (e) {
     console.error('Erreur JavaScript:', e.error);
 });
 
 // Sauvegarde automatique périodique
-setInterval(saveData, 30000); // Sauvegarde toutes les 30 secondes
+if (!isDisplayMode) {
+    setInterval(saveData, 30000); // Sauvegarde toutes les 30 secondes
+}
 
 // Export des fonctions globales pour les boutons HTML
-window.addParticipant = addParticipant;
-window.deleteParticipant = deleteParticipant;
-window.duplicateParticipant = duplicateParticipant;
-window.resetParticipantScores = resetParticipantScores;
-window.clearAllData = clearAllData;
-window.sortBy = sortBy;
-window.filterParticipants = filterParticipants;
-window.exportData = exportData;
-window.importData = importData;
-window.processImport = processImport;
+globalThis.addParticipant = addParticipant;
+globalThis.deleteParticipant = deleteParticipant;
+globalThis.duplicateParticipant = duplicateParticipant;
+globalThis.resetParticipantScores = resetParticipantScores;
+globalThis.clearAllData = clearAllData;
+globalThis.sortBy = sortBy;
+globalThis.filterParticipants = filterParticipants;
+globalThis.exportData = exportData;
+globalThis.importData = importData;
+globalThis.processImport = processImport;
 
 // Nouvelles fonctions
-window.toggleSimpleView = toggleSimpleView;
-window.showExportAssistant = showExportAssistant;
-window.executeExport = executeExport;
-window.showImportAssistant = showImportAssistant;
-window.executeImport = executeImport;
-window.showClearConfirmation = showClearConfirmation;
-window.executeClear = executeClear;
+globalThis.toggleSimpleView = toggleSimpleView;
+globalThis.showExportAssistant = showExportAssistant;
+globalThis.executeExport = executeExport;
+globalThis.showImportAssistant = showImportAssistant;
+globalThis.executeImport = executeImport;
+globalThis.showClearConfirmation = showClearConfirmation;
+globalThis.executeClear = executeClear;
+globalThis.openDisplayScreen = openDisplayScreen;
