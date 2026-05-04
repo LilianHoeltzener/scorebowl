@@ -33,6 +33,77 @@ body.display-mode .display-screen {
     display: flex !important;
 }
 
+/* ========== Thème catégorie ADULTES (saisie) ========== */
+body.category-adults {
+    background-color: #f0f4f8;
+}
+
+body.category-adults header {
+    background: linear-gradient(135deg, #0d6efd, #0b5ed7) !important;
+}
+
+/* ========== Thème catégorie ENFANTS (saisie) ========== */
+body.category-children {
+    background-color: #fff8f0;
+}
+
+body.category-children header {
+    background: linear-gradient(135deg, #e67e22, #d35400) !important;
+}
+
+body.category-children .card-header.bg-light {
+    background-color: #fff3e0 !important;
+}
+
+body.category-children .table-dark {
+    --bs-table-bg: #e67e22;
+    --bs-table-border-color: #cf6d17;
+}
+
+body.category-children .rank-1 {
+    background-color: #e67e22;
+}
+
+/* ========== Thème catégorie ADULTES (affichage) ========== */
+body.display-mode.category-adults {
+    background:
+        radial-gradient(circle at top left, rgba(13, 110, 253, 0.25), transparent 30%),
+        radial-gradient(circle at top right, rgba(25, 135, 84, 0.2), transparent 22%),
+        linear-gradient(180deg, #0a1930, #12284a 45%, #0f1f35 100%);
+}
+
+/* ========== Thème catégorie ENFANTS (affichage) ========== */
+body.display-mode.category-children {
+    background:
+        radial-gradient(circle at top left, rgba(243, 156, 18, 0.4), transparent 35%),
+        radial-gradient(circle at top right, rgba(211, 84, 0, 0.3), transparent 25%),
+        linear-gradient(180deg, #e67e22, #d35400 50%, #c0392b 100%);
+}
+
+body.display-mode.category-children .display-screen__board {
+    background: rgba(0, 0, 0, 0.3);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+body.display-mode.category-children .display-screen__table-head {
+    background: rgba(0, 0, 0, 0.15);
+    border-bottom-color: rgba(255, 255, 255, 0.15);
+}
+
+body.display-mode.category-children .display-screen__row--podium {
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.02));
+}
+
+body.display-mode.category-children .display-screen__total {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(255, 255, 255, 0.75));
+    color: #d35400;
+}
+
+body.display-mode.category-children .display-stat {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(0, 0, 0, 0.15);
+}
+
 /* Header Styles */
 header {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
@@ -356,8 +427,29 @@ header {
     border-radius: 50%;
     font-weight: 800;
     font-size: 1.4rem;
-    color: #08213f;
-    background: linear-gradient(135deg, #f7d24a, #fff2a8);
+}
+
+.display-screen__rank--1 {
+    background: linear-gradient(135deg, #ffd700, #ffed4e);
+    color: #8b6914;
+    box-shadow: 0 4px 16px rgba(255, 215, 0, 0.4);
+}
+
+.display-screen__rank--2 {
+    background: linear-gradient(135deg, #c0c0c0, #e8e8e8);
+    color: #555;
+    box-shadow: 0 4px 16px rgba(192, 192, 192, 0.35);
+}
+
+.display-screen__rank--3 {
+    background: linear-gradient(135deg, #cd7f32, #daa520);
+    color: #4a3520;
+    box-shadow: 0 4px 16px rgba(205, 127, 50, 0.35);
+}
+
+.display-screen__rank--other {
+    background: #4a5568;
+    color: rgba(255, 255, 255, 0.85);
 }
 
 .display-screen__name {

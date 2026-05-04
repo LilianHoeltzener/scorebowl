@@ -6,24 +6,41 @@ let currentSort = 'rank';
 let sortDirection = 'asc'; // 'asc' ou 'desc'
 let nextId = 1;
 let simpleView = false; // Vue simplifiée (masque les colonnes de scores individuels)
-const isDisplayMode = new URLSearchParams(globalThis.location.search).get('mode') === 'display';
+const urlParams = new URLSearchParams(globalThis.location.search);
+const isDisplayMode = urlParams.get('mode') === 'display';
+const displayCategory = urlParams.get('category') || 'adults';
+let currentCategory = isDisplayMode ? displayCategory : 'adults'; // 'adults' ou 'children'
 let displayRefreshInterval = null;
 let displayScrollInterval = null;
 let displayResizeHandler = null;
 let displayDataFingerprint = '';
 let displayScrollStartTimeout = null;
 
-// Clés pour le localStorage
-const STORAGE_KEY = 'scorebowl_participants';
+// Clés pour le localStorage (dépendent de la catégorie)
+function getStorageKey() {
+    return `scorebowl_participants_${currentCategory}`;
+}
 const SETTINGS_KEY = 'scorebowl_settings';
+const CATEGORY_KEY = 'scorebowl_current_category';
 
 // Initialisation de l'application
 document.addEventListener('DOMContentLoaded', function () {
+    migrateOldData();
+    if (!isDisplayMode) {
+        // Restaurer la dernière catégorie utilisée
+        const savedCategory = localStorage.getItem(CATEGORY_KEY);
+        if (savedCategory === 'adults' || savedCategory === 'children') {
+            currentCategory = savedCategory;
+        }
+    }
     loadData();
     initializeMode();
     updateDisplay();
-    updateViewToggleButton();
-    updateTableColumns();
+    if (!isDisplayMode) {
+        updateCategoryButtons();
+        updateViewToggleButton();
+        updateTableColumns();
+    }
     setupEventListeners();
     console.log('ScoreBowl initialized');
 });
@@ -481,7 +498,7 @@ function saveData() {
             nextId: nextId,
             lastModified: new Date().toISOString()
         };
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        localStorage.setItem(getStorageKey(), JSON.stringify(data));
     } catch (error) {
         console.error('Erreur lors de la sauvegarde:', error);
         alert('Erreur lors de la sauvegarde des données');
@@ -490,12 +507,15 @@ function saveData() {
 
 function loadData() {
     try {
-        const data = localStorage.getItem(STORAGE_KEY);
+        const data = localStorage.getItem(getStorageKey());
         if (data) {
             const parsed = JSON.parse(data);
             participants = parsed.participants || [];
             nextId = parsed.nextId || 1;
             updateRankings();
+        } else {
+            participants = [];
+            nextId = 1;
         }
         loadSettings();
     } catch (error) {
@@ -548,7 +568,7 @@ function exportData() {
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = `scorebowl_export_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `scorebowl_${currentCategory}_export_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -631,6 +651,7 @@ function executeExport() {
         participants: participants,
         exportDate: new Date().toISOString(),
         version: '1.1',
+        category: currentCategory,
         metadata: {
             totalParticipants: participants.length,
             exportedBy: 'ScoreBowl',
@@ -655,7 +676,7 @@ function executeExport() {
 
     const a = document.createElement('a');
     a.href = url;
-    a.download = `scorebowl_export_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `scorebowl_${currentCategory}_export_${new Date().toISOString().split('T')[0]}.json`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -785,9 +806,6 @@ function executeClear() {
 
     participants = [];
     nextId = 1;
-    currentSort = 'rank';
-    sortDirection = 'asc';
-    simpleView = false;
 
     updateDisplay();
     updateViewToggleButton();
@@ -866,7 +884,14 @@ function initializeMode() {
     }
 
     document.body.classList.add('display-mode');
-    document.title = 'ScoreBowl - Classement en direct';
+    document.body.classList.add(`category-${currentCategory}`);
+    document.title = `ScoreBowl - Classement ${getCategoryLabel(currentCategory)}`;
+
+    const eyebrow = document.getElementById('displayEyebrow');
+    if (eyebrow) {
+        eyebrow.textContent = `Classement ${getCategoryLabel(currentCategory)}`;
+    }
+
     startDisplayAutoRefresh();
 
     displayResizeHandler = () => {
@@ -965,7 +990,7 @@ function restartDisplayAutoScroll() {
         }
 
         viewport.scrollTop = 0;
-        let pauseTicks = 60; // pause initiale en haut (~2s)
+        let pauseTicks = 50; // pause initiale en haut (~1.5s)
         let reachedBottom = false;
 
         displayScrollInterval = setInterval(() => {
@@ -981,21 +1006,21 @@ function restartDisplayAutoScroll() {
                     // fin de pause en bas → retour en haut
                     viewport.scrollTop = 0;
                     reachedBottom = false;
-                    pauseTicks = 60; // pause en haut avant de redéfiler
+                    pauseTicks = 50; // pause en haut avant de redéfiler
                 }
                 return;
             }
 
-            const next = viewport.scrollTop + 1;
+            const next = viewport.scrollTop + 3;
             if (next >= dynamicMax) {
                 viewport.scrollTop = dynamicMax;
                 reachedBottom = true;
-                pauseTicks = 90; // ~3s de pause en bas
+                pauseTicks = 70; // ~2s de pause en bas
                 return;
             }
 
             viewport.scrollTop = next;
-        }, 35);
+        }, 30);
     };
 
     startWhenReady();
@@ -1027,9 +1052,10 @@ function renderDisplayRows(rows) {
     listElement.innerHTML = rows
         .map((participant) => {
             const rowClass = participant.rank <= 3 ? 'display-screen__row display-screen__row--podium' : 'display-screen__row';
+            const rankClass = participant.rank <= 3 ? `display-screen__rank display-screen__rank--${participant.rank}` : 'display-screen__rank display-screen__rank--other';
             return `
                 <div class="${rowClass}">
-                    <span class="display-screen__rank">${participant.rank}</span>
+                    <span class="${rankClass}">${participant.rank}</span>
                     <span class="display-screen__name">${escapeHtml(participant.name)}</span>
                     <span class="display-screen__score">${participant.score1}</span>
                     <span class="display-screen__score">${participant.score2}</span>
@@ -1055,9 +1081,61 @@ function getDisplayDataFingerprint(participantList) {
     );
 }
 
-function openDisplayScreen() {
-    const displayUrl = new URL(`${globalThis.location.pathname}?mode=display`, globalThis.location.href).toString();
-    globalThis.open(displayUrl, 'scorebowl-display');
+function openDisplayScreen(category) {
+    const cat = category || currentCategory;
+    const displayUrl = new URL(`${globalThis.location.pathname}?mode=display&category=${cat}`, globalThis.location.href).toString();
+    globalThis.open(displayUrl, `scorebowl-display-${cat}`);
+}
+
+// Gestion des catégories
+function switchCategory(category) {
+    if (isDisplayMode) return;
+    if (category === currentCategory) return;
+
+    currentCategory = category;
+    localStorage.setItem(CATEGORY_KEY, category);
+    loadData();
+    updateDisplay();
+    updateCategoryButtons();
+    showToast(category === 'adults' ? 'Catégorie Adultes' : 'Catégorie Enfants');
+}
+
+function updateCategoryButtons() {
+    const adultsBtn = document.getElementById('categoryAdultsBtn');
+    const childrenBtn = document.getElementById('categoryChildrenBtn');
+    if (!adultsBtn || !childrenBtn) return;
+
+    if (currentCategory === 'adults') {
+        adultsBtn.className = 'btn btn-light btn-sm active';
+        childrenBtn.className = 'btn btn-outline-light btn-sm';
+    } else {
+        adultsBtn.className = 'btn btn-outline-light btn-sm';
+        childrenBtn.className = 'btn btn-light btn-sm active';
+    }
+
+    // Mettre à jour la classe de catégorie sur le body
+    document.body.classList.remove('category-adults', 'category-children');
+    document.body.classList.add(`category-${currentCategory}`);
+
+    const tableTitle = document.getElementById('tableTitle');
+    if (tableTitle) {
+        const label = getCategoryLabel(currentCategory);
+        tableTitle.innerHTML = `<i class="bi bi-list-ol"></i> Classement - ${label}`;
+    }
+}
+
+function migrateOldData() {
+    // Migrer les anciennes données (scorebowl_participants) vers le format catégorie
+    const oldData = localStorage.getItem('scorebowl_participants');
+    if (oldData && !localStorage.getItem('scorebowl_participants_adults')) {
+        localStorage.setItem('scorebowl_participants_adults', oldData);
+        localStorage.removeItem('scorebowl_participants');
+        console.log('Données migrées vers la catégorie Adultes');
+    }
+}
+
+function getCategoryLabel(category) {
+    return category === 'children' ? 'Enfants' : 'Adultes';
 }
 
 // Gestion des erreurs globales
@@ -1091,3 +1169,4 @@ globalThis.executeImport = executeImport;
 globalThis.showClearConfirmation = showClearConfirmation;
 globalThis.executeClear = executeClear;
 globalThis.openDisplayScreen = openDisplayScreen;
+globalThis.switchCategory = switchCategory;

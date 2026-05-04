@@ -36,10 +36,26 @@
                         <small class="opacity-75">Gestion de concours</small>
                     </div>
                     <div class="col-auto">
-                        <button class="btn btn-warning btn-sm" onclick="openDisplayScreen()" id="displayScreenBtn"
-                            title="Ouvrir l'écran d'affichage du classement">
-                            <i class="bi bi-tv"></i> Ecran classement
-                        </button>
+                        <div class="btn-group me-2" role="group" aria-label="Catégorie">
+                            <button type="button" class="btn btn-light btn-sm active" id="categoryAdultsBtn"
+                                onclick="switchCategory('adults')">
+                                <i class="bi bi-people-fill"></i> Adultes
+                            </button>
+                            <button type="button" class="btn btn-outline-light btn-sm" id="categoryChildrenBtn"
+                                onclick="switchCategory('children')">
+                                <i class="bi bi-emoji-smile"></i> Enfants
+                            </button>
+                        </div>
+                        <div class="btn-group me-2" role="group">
+                            <button class="btn btn-warning btn-sm" onclick="openDisplayScreen('adults')"
+                                title="Classement Adultes">
+                                <i class="bi bi-tv"></i> Écran Adultes
+                            </button>
+                            <button class="btn btn-warning btn-sm" onclick="openDisplayScreen('children')"
+                                title="Classement Enfants">
+                                <i class="bi bi-tv"></i> Écran Enfants
+                            </button>
+                        </div>
                         <button class="btn btn-outline-light btn-sm" onclick="toggleSimpleView()" id="viewToggleBtn"
                             title="Basculer en vue simplifiée">
                             <i class="bi bi-eye-slash"></i> Vue simple
@@ -132,7 +148,7 @@
             <!-- Participants Table -->
             <div class="card">
                 <div class="card-header bg-light">
-                    <h5 class="mb-0">
+                    <h5 class="mb-0" id="tableTitle">
                         <i class="bi bi-list-ol"></i>
                         Classement des participants
                     </h5>
@@ -190,7 +206,7 @@
     <div class="display-screen" id="displayScreen" style="display: none;">
         <div class="display-screen__header">
             <div>
-                <p class="display-screen__eyebrow">Classement en direct</p>
+                <p class="display-screen__eyebrow" id="displayEyebrow">Classement en direct</p>
                 <h1 class="display-screen__title">ScoreBowl</h1>
             </div>
             <div class="display-screen__stats">
