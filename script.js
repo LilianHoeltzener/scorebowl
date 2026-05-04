@@ -319,6 +319,9 @@ function createParticipantRow(participant) {
                    data-participant-id="${participant.id}"
                    data-field="name"
                    placeholder="Nom du participant">
+            <button class="btn btn-link btn-sm p-0 ms-1 quick-edit-btn" onclick="openQuickEdit(${participant.id})" title="Édition rapide des scores">
+                <i class="bi bi-pencil-square"></i>
+            </button>
         </td>
         ${score1Html}
         ${score2Html}
@@ -1087,6 +1090,64 @@ function openDisplayScreen(category) {
     globalThis.open(displayUrl, `scorebowl-display-${cat}`);
 }
 
+// Édition rapide des scores
+function openQuickEdit(id) {
+    if (isDisplayMode) return;
+
+    const participant = participants.find(p => p.id === id);
+    if (!participant) return;
+
+    document.getElementById('quickEditId').value = id;
+    document.getElementById('quickEditName').innerHTML = `<i class="bi bi-pencil-square"></i> ${escapeHtml(participant.name)}`;
+    document.getElementById('quickEditScore1').value = participant.score1;
+    document.getElementById('quickEditScore2').value = participant.score2;
+    document.getElementById('quickEditScore3').value = participant.score3;
+    updateQuickEditTotal();
+
+    // Mettre à jour le total en temps réel
+    ['quickEditScore1', 'quickEditScore2', 'quickEditScore3'].forEach(inputId => {
+        const el = document.getElementById(inputId);
+        el.oninput = updateQuickEditTotal;
+    });
+
+    const modal = new bootstrap.Modal(document.getElementById('quickEditModal'));
+    modal.show();
+
+    // Focus sur Score 1
+    document.getElementById('quickEditModal').addEventListener('shown.bs.modal', function handler() {
+        document.getElementById('quickEditScore1').focus();
+        document.getElementById('quickEditScore1').select();
+        document.getElementById('quickEditModal').removeEventListener('shown.bs.modal', handler);
+    });
+}
+
+function updateQuickEditTotal() {
+    const s1 = parseInt(document.getElementById('quickEditScore1').value) || 0;
+    const s2 = parseInt(document.getElementById('quickEditScore2').value) || 0;
+    const s3 = parseInt(document.getElementById('quickEditScore3').value) || 0;
+    document.getElementById('quickEditTotal').textContent = `Total : ${s1 + s2 + s3}`;
+}
+
+function saveQuickEdit() {
+    if (isDisplayMode) return;
+
+    const id = parseInt(document.getElementById('quickEditId').value);
+    const participant = participants.find(p => p.id === id);
+    if (!participant) return;
+
+    participant.score1 = Math.max(0, parseInt(document.getElementById('quickEditScore1').value) || 0);
+    participant.score2 = Math.max(0, parseInt(document.getElementById('quickEditScore2').value) || 0);
+    participant.score3 = Math.max(0, parseInt(document.getElementById('quickEditScore3').value) || 0);
+    participant.total = participant.score1 + participant.score2 + participant.score3;
+
+    updateRankings();
+    updateDisplay();
+    saveData();
+
+    bootstrap.Modal.getInstance(document.getElementById('quickEditModal')).hide();
+    showToast(`Scores de "${participant.name}" mis à jour`);
+}
+
 // Gestion des catégories
 function switchCategory(category) {
     if (isDisplayMode) return;
@@ -1170,3 +1231,5 @@ globalThis.showClearConfirmation = showClearConfirmation;
 globalThis.executeClear = executeClear;
 globalThis.openDisplayScreen = openDisplayScreen;
 globalThis.switchCategory = switchCategory;
+globalThis.openQuickEdit = openQuickEdit;
+globalThis.saveQuickEdit = saveQuickEdit;

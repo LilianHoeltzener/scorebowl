@@ -159,6 +159,17 @@ header {
     font-weight: 500;
 }
 
+/* Quick Edit Button */
+.quick-edit-btn {
+    opacity: 0.4;
+    transition: opacity 0.2s;
+    vertical-align: middle;
+}
+
+.participant-row:hover .quick-edit-btn {
+    opacity: 1;
+}
+
 /* Rank Badge */
 .rank-badge {
     display: inline-flex;

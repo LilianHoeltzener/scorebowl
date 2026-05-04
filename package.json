@@ -1,6 +1,6 @@
 {
     "name": "scorebowl-desktop",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "ScoreBowl en application desktop installable Windows et macOS",
     "main": "electron/main.js",
     "private": true,
